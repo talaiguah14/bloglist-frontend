@@ -16,9 +16,9 @@ const App = () => {
   const [password, setPassword] = useState('');
   const [user, setUser] = useState(null);
 
-  const [title, setTitle] = useState('');
-  const [author, setAuthor] = useState('');
-  const [url, setUrl] = useState('');
+  const [newTitle, setTitle] = useState('');
+  const [newAuthor, setAuthor] = useState('');
+  const [newUrl, setUrl] = useState('');
 
   useEffect(() => {
     blogService.getAll().then((blogs) => setBlogs(blogs));
@@ -28,7 +28,8 @@ const App = () => {
     const loggedUserJSON = window.localStorage.getItem('loggedNoteappUser');
     if (loggedUserJSON) {
       const user = JSON.parse(loggedUserJSON);
-      setUser(user);
+      setUser(user)      
+      blogService.setToken(user.token)
     }
   }, []);
 
@@ -36,14 +37,23 @@ const App = () => {
     event.preventDefault();
 
     try {
-      const user = await loginService.login({
+      const response = await loginService.login({
         username,
         password,
-      });
-      window.localStorage.setItem('loggedNoteappUser', JSON.stringify(user));
-      setUser(user);
-      setUsername('');
-      setPassword('');
+      });      
+      if(response.status === 200){
+        const user = response.data
+        window.localStorage.setItem('loggedNoteappUser', JSON.stringify(user));
+        blogService.setToken(user.token)
+        setUser(user);
+        setUsername('');
+        setPassword('');
+      }else if(response.status === 401){
+        setErrorMessage(response.data.message);
+        setTimeout(() => {
+        setErrorMessage(null);
+      }, 5000);
+      }
     } catch (exception) {
       setErrorMessage('Wrong credentials');
       setTimeout(() => {
@@ -51,7 +61,35 @@ const App = () => {
       }, 5000);
     }
   };
-  const handleCreateBlog = async (event) => {
+  const createBlog = async (event) => {
+    event.preventDefault();
+
+   const blogObject = {
+      title: newTitle,
+      author: newTitle,
+      url: newUrl
+    }
+
+    blogService.createBlog(blogObject).then((response=>{
+      const returnedBlog = response.data
+      if (response.status === 201 && returnedBlog.id !== null) {
+        setBlogs(blogs.concat(returnedBlog))
+        setTitle('')
+        setAuthor('')
+        setUrl('')
+        setErrorMessage(`the blog has been added successfully ${returnedBlog.title}`)
+        setTimeout(() => {
+          setErrorMessage(null);
+        }, 5000)
+      }else if(response.status === 400){
+        setErrorMessage(response.data.error);
+        setTimeout(() => {
+          setErrorMessage(null);
+        }, 5000);
+      }
+      
+    }))
+
     
   };
   const handleLUsernameChange = (event) => {
@@ -89,12 +127,12 @@ const App = () => {
             {user.name} logged in <Button type='submit'>logout</Button>
           </p>
           <BlogForm
-            handleCreateBlog={handleCreateBlog}
-            title={title}
+            createBlog={createBlog}
+            title={newTitle}
             handleTitleChange={handleTitleChange}
-            author={author}
+            author={newAuthor}
             handleAuthorChange={handleAuthorChange}
-            url={url}
+            url={newUrl}
             handleUrlChange={handleUrlChange}
           />
           <h2>blogs</h2>

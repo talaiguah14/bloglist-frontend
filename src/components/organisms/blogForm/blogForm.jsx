@@ -3,7 +3,7 @@ import Input from "../../atoms/input/Input";
 import Label from "../../atoms/label/Label";
 
 const BlogForm = ({
-    handleCreateBlog,
+    createBlog,
     title,
     handleTitleChange,
     author,
@@ -12,7 +12,7 @@ const BlogForm = ({
     handleUrlChange
 }) => {
   return (
-    <form onSubmit={handleCreateBlog}>
+    <form onSubmit={createBlog}>
       <h2>Create new Blog</h2>
       <Label form="Title">
         Title:
