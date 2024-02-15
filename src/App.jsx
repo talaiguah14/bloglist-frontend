@@ -1,16 +1,18 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Blog from './components/organisms/Blog';
 import Login from './components/organisms/loginForm/Login';
 import Notification from './components/atoms/notification/notification';
-import blogService from './services/blogs';
-import loginService from './services/login';
 import Button from './components/atoms/button/Button';
 import BlogForm from './components/organisms/blogForm/blogForm';
+import Togglable from './components/atoms/togglable/togglable';
+import blogService from './services/blogs';
+import loginService from './services/login';
 
 const App = () => {
   const [blogs, setBlogs] = useState([]);
   const [errorMessage, setErrorMessage] = useState(null);
   const [confirmMessage, setConfirmMessage] = useState(null);
+  const blogFormRef = useRef()
 
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -77,9 +79,9 @@ const App = () => {
         setTitle('')
         setAuthor('')
         setUrl('')
-        setErrorMessage(`the blog has been added successfully ${returnedBlog.title}`)
+        setConfirmMessage(`the blog has been added successfully ${returnedBlog.title}`)
         setTimeout(() => {
-          setErrorMessage(null);
+          setConfirmMessage(null);
         }, 5000)
       }else if(response.status === 400){
         setErrorMessage(response.data.error);
@@ -123,9 +125,11 @@ const App = () => {
       )}
       {user && (
         <div>
+          <h1>Blogs</h1>
           <p>
             {user.name} logged in <Button type='submit'>logout</Button>
           </p>
+          <Togglable buttonLabel='New Blog' ref={blogFormRef}>
           <BlogForm
             createBlog={createBlog}
             title={newTitle}
@@ -135,7 +139,8 @@ const App = () => {
             url={newUrl}
             handleUrlChange={handleUrlChange}
           />
-          <h2>blogs</h2>
+          </Togglable>
+          <h2>blogs created</h2>
           {blogs.map((blog) => (
             <Blog key={blog.id} blog={blog} />
           ))}
