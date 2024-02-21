@@ -1,18 +1,38 @@
+import { useState } from "react"
 import Button from "../../atoms/button/Button";
 import Input from "../../atoms/input/Input";
 import Label from "../../atoms/label/Label";
 
-const BlogForm = ({
-    createBlog,
-    title,
-    handleTitleChange,
-    author,
-    handleAuthorChange,
-    url,
-    handleUrlChange
-}) => {
+const BlogForm = ({createBlog}) => {
+
+  const [newTitle, setTitle] = useState('');
+  const [newAuthor, setAuthor] = useState('');
+  const [newUrl, setUrl] = useState('');
+
+  const handleTitleChange = (event) => {
+    setTitle(event.target.value);
+  };
+  const handleAuthorChange = (event) => {
+    setAuthor(event.target.value);
+  };
+  const handleUrlChange = (event) => {
+    setUrl(event.target.value);
+  };
+
+   const addBlog = (event) =>{
+    event.preventDefault()
+    createBlog({
+      title: newTitle,
+      author: newTitle,
+      url: newUrl
+    })
+    setTitle('')
+    setAuthor('')
+    setUrl('')
+   }
+
   return (
-    <form onSubmit={createBlog}>
+    <form onSubmit={addBlog}>
       <h2>Create new Blog</h2>
       <Label form="Title">
         Title:
@@ -20,7 +40,7 @@ const BlogForm = ({
           id={"Title"}
           type={"texto"}
           name={"Title"}
-          value={title}
+          value={newTitle}
           onChange={handleTitleChange}
         />
       </Label>
@@ -30,7 +50,7 @@ const BlogForm = ({
           id={"Author"}
           type={"texto"}
           name={"Author"}
-          value={author}
+          value={newAuthor}
           onChange={handleAuthorChange}
         />
       </Label>
@@ -40,7 +60,7 @@ const BlogForm = ({
           id={"Url"}
           type={"texto"}
           name={"Url"}
-          value={url}
+          value={newUrl}
           onChange={handleUrlChange}
         />
       </Label>

@@ -18,10 +18,6 @@ const App = () => {
   const [password, setPassword] = useState('');
   const [user, setUser] = useState(null);
 
-  const [newTitle, setTitle] = useState('');
-  const [newAuthor, setAuthor] = useState('');
-  const [newUrl, setUrl] = useState('');
-
   useEffect(() => {
     blogService.getAll().then((blogs) => setBlogs(blogs));
   }, []);
@@ -63,27 +59,18 @@ const App = () => {
       }, 5000);
     }
   };
-  const createBlog = async (event) => {
-    event.preventDefault();
-
-   const blogObject = {
-      title: newTitle,
-      author: newTitle,
-      url: newUrl
-    }
-
-    blogService.createBlog(blogObject).then((response=>{
+  const addBlog = (blogObject) => {
+    blogService.createBlog(blogObject)
+    .then((response=>{
       const returnedBlog = response.data
       if (response.status === 201 && returnedBlog.id !== null) {
+        blogFormRef.current.toggleVisibility()
         setBlogs(blogs.concat(returnedBlog))
-        setTitle('')
-        setAuthor('')
-        setUrl('')
         setConfirmMessage(`the blog has been added successfully ${returnedBlog.title}`)
         setTimeout(() => {
           setConfirmMessage(null);
         }, 5000)
-      }else if(response.status === 400){
+      }else if(response.status !== 201){
         setErrorMessage(response.data.error);
         setTimeout(() => {
           setErrorMessage(null);
@@ -100,15 +87,7 @@ const App = () => {
   const handlePasswordChange = (event) => {
     setPassword(event.target.value);
   };
-  const handleTitleChange = (event) => {
-    setTitle(event.target.value);
-  };
-  const handleAuthorChange = (event) => {
-    setAuthor(event.target.value);
-  };
-  const handleUrlChange = (event) => {
-    setUrl(event.target.value);
-  };
+
 
   return (
     <div>
@@ -131,13 +110,7 @@ const App = () => {
           </p>
           <Togglable buttonLabel='New Blog' ref={blogFormRef}>
           <BlogForm
-            createBlog={createBlog}
-            title={newTitle}
-            handleTitleChange={handleTitleChange}
-            author={newAuthor}
-            handleAuthorChange={handleAuthorChange}
-            url={newUrl}
-            handleUrlChange={handleUrlChange}
+            createBlog={addBlog}
           />
           </Togglable>
           <h2>blogs created</h2>
